@@ -128,7 +128,11 @@ def _patch_models(models: Any) -> None:
 
             _set_input_attributes(span, contents, kwargs)
 
-            stream = orig_stream(*args, **kwargs)
+            try:
+                stream = orig_stream(*args, **kwargs)
+            except Exception as e:
+                _err(span, e)
+                raise
             return SyncStreamWrapper(stream, span, GoogleStreamFinalizer())
 
         models.generate_content_stream = patched_generate_content_stream
@@ -641,7 +645,11 @@ def _patch_chat_classes() -> None:
                 if is_suppressed():
                     return orig_send_stream(self, message, *args, **kwargs)
                 span = _start_chat_span(self, message, stream=True)
-                stream = orig_send_stream(self, message, *args, **kwargs)
+                try:
+                    stream = orig_send_stream(self, message, *args, **kwargs)
+                except Exception as e:
+                    _err(span, e)
+                    raise
                 return SyncStreamWrapper(stream, span, GoogleStreamFinalizer())
 
             Chat.send_message_stream = patched_send_stream
