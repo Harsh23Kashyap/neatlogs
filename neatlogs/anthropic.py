@@ -674,12 +674,24 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
             async def patched_parse(*args, **kwargs):
                 if is_suppressed():
                     return await orig_parse(*args, **kwargs)
-                span = _start_message_span(kwargs, "anthropic.messages.parse", structured=True)
-                start = time.perf_counter()
+                span = None
+                try:
+                    span = _start_message_span(kwargs, "anthropic.messages.parse", structured=True)
+                    start = time.perf_counter()
+                except Exception:
+                    if span is not None:
+                        try:
+                            span.end()
+                        except Exception:
+                            pass
+                    return await orig_parse(*args, **kwargs)
                 try:
                     resp = await orig_parse(*args, **kwargs)
                 except Exception as e:
-                    _err(span, e)
+                    try:
+                        _err(span, e)
+                    except Exception:
+                        pass
                     raise
                 _finalize_response(span, resp, (time.perf_counter() - start) * 1000)
                 return resp
@@ -689,12 +701,24 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
             def patched_parse(*args, **kwargs):
                 if is_suppressed():
                     return orig_parse(*args, **kwargs)
-                span = _start_message_span(kwargs, "anthropic.messages.parse", structured=True)
-                start = time.perf_counter()
+                span = None
+                try:
+                    span = _start_message_span(kwargs, "anthropic.messages.parse", structured=True)
+                    start = time.perf_counter()
+                except Exception:
+                    if span is not None:
+                        try:
+                            span.end()
+                        except Exception:
+                            pass
+                    return orig_parse(*args, **kwargs)
                 try:
                     resp = orig_parse(*args, **kwargs)
                 except Exception as e:
-                    _err(span, e)
+                    try:
+                        _err(span, e)
+                    except Exception:
+                        pass
                     raise
                 _finalize_response(span, resp, (time.perf_counter() - start) * 1000)
                 return resp
@@ -712,19 +736,31 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
             async def patched_count(*args, **kwargs):
                 if is_suppressed():
                     return await orig_count(*args, **kwargs)
-                span = get_provider_tracer().start_span(
-                    name="anthropic.messages.count_tokens",
-                    attributes={
-                        "neatlogs.span.kind": "llm",
-                        "neatlogs.llm.provider": "anthropic",
-                        "neatlogs.llm.task": "count_tokens",
-                        "neatlogs.llm.model_name": kwargs.get("model", ""),
-                    },
-                )
+                span = None
+                try:
+                    span = get_provider_tracer().start_span(
+                        name="anthropic.messages.count_tokens",
+                        attributes={
+                            "neatlogs.span.kind": "llm",
+                            "neatlogs.llm.provider": "anthropic",
+                            "neatlogs.llm.task": "count_tokens",
+                            "neatlogs.llm.model_name": kwargs.get("model", ""),
+                        },
+                    )
+                except Exception:
+                    if span is not None:
+                        try:
+                            span.end()
+                        except Exception:
+                            pass
+                    return await orig_count(*args, **kwargs)
                 try:
                     resp = await orig_count(*args, **kwargs)
                 except Exception as e:
-                    _err(span, e)
+                    try:
+                        _err(span, e)
+                    except Exception:
+                        pass
                     raise
                 _finalize_count_tokens(span, resp)
                 return resp
@@ -734,19 +770,31 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
             def patched_count(*args, **kwargs):
                 if is_suppressed():
                     return orig_count(*args, **kwargs)
-                span = get_provider_tracer().start_span(
-                    name="anthropic.messages.count_tokens",
-                    attributes={
-                        "neatlogs.span.kind": "llm",
-                        "neatlogs.llm.provider": "anthropic",
-                        "neatlogs.llm.task": "count_tokens",
-                        "neatlogs.llm.model_name": kwargs.get("model", ""),
-                    },
-                )
+                span = None
+                try:
+                    span = get_provider_tracer().start_span(
+                        name="anthropic.messages.count_tokens",
+                        attributes={
+                            "neatlogs.span.kind": "llm",
+                            "neatlogs.llm.provider": "anthropic",
+                            "neatlogs.llm.task": "count_tokens",
+                            "neatlogs.llm.model_name": kwargs.get("model", ""),
+                        },
+                    )
+                except Exception:
+                    if span is not None:
+                        try:
+                            span.end()
+                        except Exception:
+                            pass
+                    return orig_count(*args, **kwargs)
                 try:
                     resp = orig_count(*args, **kwargs)
                 except Exception as e:
-                    _err(span, e)
+                    try:
+                        _err(span, e)
+                    except Exception:
+                        pass
                     raise
                 _finalize_count_tokens(span, resp)
                 return resp
