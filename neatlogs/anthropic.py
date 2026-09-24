@@ -693,7 +693,10 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
                     except Exception:
                         pass
                     raise
-                _finalize_response(span, resp, (time.perf_counter() - start) * 1000)
+                _finish_ok(
+                    span,
+                    lambda: _finalize_response(span, resp, (time.perf_counter() - start) * 1000),
+                )
                 return resp
 
         else:
@@ -720,7 +723,10 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
                     except Exception:
                         pass
                     raise
-                _finalize_response(span, resp, (time.perf_counter() - start) * 1000)
+                _finish_ok(
+                    span,
+                    lambda: _finalize_response(span, resp, (time.perf_counter() - start) * 1000),
+                )
                 return resp
 
         messages.parse = patched_parse
@@ -762,7 +768,7 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
                     except Exception:
                         pass
                     raise
-                _finalize_count_tokens(span, resp)
+                _finish_ok(span, lambda: _finalize_count_tokens(span, resp))
                 return resp
 
         else:
@@ -796,7 +802,7 @@ def _extra_message_methods(messages: Any, is_async: bool) -> None:
                     except Exception:
                         pass
                     raise
-                _finalize_count_tokens(span, resp)
+                _finish_ok(span, lambda: _finalize_count_tokens(span, resp))
                 return resp
 
         messages.count_tokens = patched_count
