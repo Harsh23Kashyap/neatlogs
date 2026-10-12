@@ -218,6 +218,7 @@ def test_openai_happy_path_still_emits_span():
 
 
 def test_anthropic_pre_exec_throwing_messages_fails_open_to_orig():
+    pytest.importorskip("anthropic")
     provider, _ = _setup_provider()
     _wu._neatlogs_provider = provider
     _wu._wrapper_tracer = None
@@ -423,6 +424,7 @@ def test_openai_finalize_throws_still_ends_span_and_returns_response():
 
 
 def test_anthropic_finalize_throws_still_ends_span_and_returns_response():
+    pytest.importorskip("anthropic")
     provider, exporter = _setup_provider()
     _wu._neatlogs_provider = provider
     _wu._wrapper_tracer = None
