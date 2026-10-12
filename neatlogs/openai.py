@@ -147,7 +147,9 @@ def _patch_completions(completions: Any) -> None:
                 if isinstance(content, str):
                     span.set_attribute(f"neatlogs.llm.input_messages.{i}.content", content)
                 else:
-                    span.set_attribute(f"neatlogs.llm.input_messages.{i}.content", serialize(content))
+                    span.set_attribute(
+                        f"neatlogs.llm.input_messages.{i}.content", serialize(content)
+                    )
                 set_media_attributes(span, f"neatlogs.llm.input_messages.{i}", content, "input")
                 if msg.get("tool_call_id"):
                     span.set_attribute(
@@ -246,8 +248,14 @@ def _patch_async_completions(completions: Any) -> None:
                 if isinstance(content, str):
                     span.set_attribute(f"neatlogs.llm.input_messages.{i}.content", content)
                 else:
-                    span.set_attribute(f"neatlogs.llm.input_messages.{i}.content", serialize(content))
+                    span.set_attribute(
+                        f"neatlogs.llm.input_messages.{i}.content", serialize(content)
+                    )
                 set_media_attributes(span, f"neatlogs.llm.input_messages.{i}", content, "input")
+                if msg.get("tool_call_id"):
+                    span.set_attribute(
+                        f"neatlogs.llm.input_messages.{i}.tool_call_id", msg["tool_call_id"]
+                    )
 
             tools = kwargs.get("tools")
             if tools:
